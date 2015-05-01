@@ -18,6 +18,8 @@ import android.widget.TextView;
 
 import java.net.URL;
 
+import io.rets.sdk.resources.Listing;
+
 
 public class ListingView extends RelativeLayout {
         private TextView header;
@@ -33,7 +35,7 @@ public class ListingView extends RelativeLayout {
             this.description = (TextView)findViewById(R.id.description);
             this.header = (TextView)findViewById(R.id.title);
             this.thumbnail = (ImageView)findViewById(R.id.imageView);
-            this.header.setText(l.getPrice());
+            this.header.setText(Double.toString(l.getPrice()));
 
             this.description.setText(l.getAddress());
 

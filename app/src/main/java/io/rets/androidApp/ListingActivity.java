@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -19,10 +18,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONObject;
+
 import java.util.List;
+
+import io.rets.sdk.resources.Listing;
 
 
 public class ListingActivity extends ActionBarActivity {
@@ -34,18 +38,25 @@ public class ListingActivity extends ActionBarActivity {
     LinearLayout listView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listing);
-        String json = getIntent().getExtras().getString(LISTING_JSON_EXTRA);
+        String jsonStr = getIntent().getExtras().getString(LISTING_JSON_EXTRA);
+        JSONObject json = new JSONObject();
+        try{
+            json = new JSONObject(jsonStr);
+        }
+        catch (Exception e){
+
+        }
         this.listing = new Listing(json);
 
         ((TextView)findViewById(R.id.list_address)).setText(this.listing.getAddress());
-        ((TextView)findViewById(R.id.list_price)).setText(this.listing.getPrice());
-        ((TextView)findViewById(R.id.year_built)).setText(this.listing.getYearBuilt());
+        ((TextView)findViewById(R.id.list_price)).setText(this.listing.getFormatedPrice());
+        ((TextView)findViewById(R.id.year_built)).setText(Integer.toString(this.listing.getYearBuilt()));
 
-        ((TextView)findViewById(R.id.beds)).setText(this.listing.getBeds());
-        ((TextView)findViewById(R.id.baths)).setText(this.listing.getBaths());
+        ((TextView)findViewById(R.id.beds)).setText(Integer.toString(this.listing.getBeds()));
+        ((TextView)findViewById(R.id.baths)).setText(Integer.toString(this.listing.getBaths()));
 
 
         MapsInitializer.initialize(this);
@@ -53,9 +64,9 @@ public class ListingActivity extends ActionBarActivity {
         // Gets the MapView from the XML layout and creates it
         mapView = (MapView) findViewById(R.id.mapview);
         mapView.onCreate(savedInstanceState);
-        Log.v("latln",listing.getLatLng().toString());
+        LatLng latLng = new LatLng(listing.getLatitude(),listing.getLongitude());
         CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(listing.getLatLng())
+                .target(latLng)
                 .zoom(12)                   // Sets the zoom
                 .build();                   // Creates a CameraPosition from the builder
 
@@ -64,7 +75,7 @@ public class ListingActivity extends ActionBarActivity {
         map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
         Marker marker = map.addMarker(new MarkerOptions()
-                .position(listing.getLatLng())
+                .position(latLng)
                 .title(listing.getAddress())
                 .snippet("Home"));
 
@@ -75,7 +86,7 @@ public class ListingActivity extends ActionBarActivity {
         MapsInitializer.initialize(this);
 
         listView = (LinearLayout)findViewById(R.id.photo_list);
-
+        String[] urls = this.listing.getImageUrlsArray();
         new ImageLoadAsyncTask(new BitmapLoaded(){
             @Override
             public void onBitmapLoad(List<Bitmap> result){

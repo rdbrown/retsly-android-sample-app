@@ -14,28 +14,34 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import io.rets.androidApp.sdk.RetslyAndroidClient;
+import io.rets.sdk.async.RetslyCallback;
+import io.rets.sdk.async.RetslyListCallback;
+import io.rets.sdk.resources.Listing;
+import io.rets.sdk.resources.Vendor;
 
 
 public class MapActivity extends ActionBarActivity {
 
     private MapView mapView;
     GoogleMap map;
-    private Retsly retsly;
+    private RetslyAndroidClient retsly;
+    private TextView vendorText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
         MapsInitializer.initialize(this);
-
+         vendorText = ((TextView) findViewById(R.id.vendor_text));
         // Gets the MapView from the XML layout and creates it
         mapView = (MapView) findViewById(R.id.big_map_view);
         mapView.onCreate(savedInstanceState);
@@ -44,45 +50,52 @@ public class MapActivity extends ActionBarActivity {
         map.setMyLocationEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
         MapsInitializer.initialize(this);
-        retsly = new Retsly();
+        retsly = new RetslyAndroidClient();
         loadListings();
     }
 
     public void loadListings(){
         final Activity self = this;
-        retsly.queryVendor(new RetslyCallback<RetslyVendor>() {
-            @Override
-            public void getData(RetslyVendor vendor) {
-                CameraPosition cameraPosition = new CameraPosition.Builder()
-                        .target(vendor.getCenter())
-                        .zoom(12)                   // Sets the zoom
-                        .build();                   // Creates a CameraPosition from the builder
+        try {
+            retsly.vendors().findByIdAsync("test_sf", new RetslyCallback<Vendor>() {
+                @Override
+                public void getData(Vendor vendor) {
+                    CameraPosition cameraPosition = new CameraPosition.Builder()
+                            .target(new LatLng(vendor.getCenterLatitude(), vendor.getCenterLongitude()))
+                            .zoom(12)                   // Sets the zoom
+                            .build();                   // Creates a CameraPosition from the builder
 
 
-                map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
-                Log.v("vendor", vendor.toString());
-                ((TextView)findViewById(R.id.vendor_text)).setText(vendor.getName());
+                    //vendorText.setText(vendor.getName());
 
-                List<NameValuePair> q = new ArrayList<NameValuePair>();
-                q.add(new BasicNameValuePair("sortBy", "lastModified"));
-                q.add(new BasicNameValuePair("limit", "20"));
+                }
+            });
 
-                retsly.setQuery(q).queryListings(new RetslyListCallback<Listing>() {
-                    @Override
-                    public void getDataList(List<Listing> data) {
-                        for (Listing l : data) {
-                            Marker marker = map.addMarker(new MarkerOptions()
-                                    .position(l.getLatLng())
-                                    .title(l.getAddress())
-                                    .snippet("Home"));
-                        }
-                        map.setOnMarkerClickListener(new MarkerClickListener(self, data));
-
+            retsly.listings()
+            .where(new BasicNameValuePair("sortBy", "lastModified"))
+            .limit(20)
+            .findAllAysnc(new RetslyListCallback<Listing>() {
+                @Override
+                public void getDataList(List<Listing> data) {
+                    for (Listing l : data) {
+                        Marker marker = map.addMarker(new MarkerOptions()
+                                .position(new LatLng(l.getLatitude(), l.getLongitude()))
+                                .title(l.getAddress())
+                                .snippet("Home"));
                     }
-                });
-            }
-        });
+                    map.setOnMarkerClickListener(new MarkerClickListener(self, data));
+
+                }
+            });
+
+        }
+        catch (Exception e){
+
+            Log.e("Error", e.getMessage());
+            Log.e("Error", e.getStackTrace().toString());
+        }
     }
 
     @Override

@@ -9,9 +9,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-
-import java.util.Timer;
 
 
 public class StartActivity extends Activity {
@@ -20,12 +17,9 @@ public class StartActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_starting);
-        Timer t = new Timer();
-        t.scheduleAtFixedRate(new RetslyTask(this), 2*60*1000, 2*60*1000);
 
-
-        Button agentButton = (Button) findViewById(R.id.listing_button);
-        agentButton.setOnTouchListener(new View.OnTouchListener() {
+        Button listingButton = (Button) findViewById(R.id.listing_button);
+        listingButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
@@ -36,6 +30,10 @@ public class StartActivity extends Activity {
             }
         });
 
+        //Timer t = new Timer();
+        //t.scheduleAtFixedRate(new RetslyTask(this), 2*60*1000, 2*60*1000);
+
+
         Button mapButton = (Button) findViewById(R.id.map_button);
         mapButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -45,14 +43,6 @@ public class StartActivity extends Activity {
                     v.getContext().startActivity(intent);
                 }
                 return false;
-            }
-        });
-
-        new Retsly().queryMe(new RetslyCallback<RetslyUser>() {
-            @Override
-            public void getData(RetslyUser data) {
-                ((TextView)findViewById(R.id.user_email)).setText(data.getEmail());
-
             }
         });
 

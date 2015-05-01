@@ -17,6 +17,10 @@ import com.google.android.gms.maps.MapView;
 
 import java.util.List;
 
+import io.rets.androidApp.sdk.RetslyAndroidClient;
+import io.rets.sdk.async.RetslyCallback;
+import io.rets.sdk.resources.Agent;
+
 
 public class AgentActivity extends ActionBarActivity {
 
@@ -34,29 +38,35 @@ public class AgentActivity extends ActionBarActivity {
 
         agentPhoto = (ImageView) findViewById(R.id.agent_photo);
 
+        try {
 
-        new Retsly().queryAgent(agentID, new RetslyCallback<Agent>() {
-            @Override
-            public void getData(Agent data) {
-                Log.v("Agent", data.toString());
-                agent = data;
-                ((TextView) findViewById(R.id.agent_name)).setText(agent.getFullName());
-                ((TextView) findViewById(R.id.office_name)).setText(agent.getOfficeName());
-                ((TextView) findViewById(R.id.agent_email)).setText(agent.getEmail());
-                ((Button) findViewById(R.id.call_agent_button)).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        makeCall();
-                    }
-                });
-                new ImageLoadAsyncTask(new BitmapLoaded() {
-                    @Override
-                    public void onBitmapLoad(List<Bitmap> result) {
-                        if(result.size() > 0) agentPhoto.setImageBitmap(result.get(0));
-                    }
-                }).execute(agent.getImageUrl());
-            }
-        });
+
+            new RetslyAndroidClient().agents().findByIdAsync(agentID, new RetslyCallback<Agent>() {
+                @Override
+                public void getData(Agent data) {
+                    Log.v("Agent", data.toString());
+                    agent = data;
+                    ((TextView) findViewById(R.id.agent_name)).setText(agent.getFullName());
+                    ((TextView) findViewById(R.id.office_name)).setText(agent.getOfficeName());
+                    ((TextView) findViewById(R.id.agent_email)).setText(agent.getEmail());
+                    ((Button) findViewById(R.id.call_agent_button)).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            makeCall();
+                        }
+                    });
+                    new ImageLoadAsyncTask(new BitmapLoaded() {
+                        @Override
+                        public void onBitmapLoad(List<Bitmap> result) {
+                            if (result.size() > 0) agentPhoto.setImageBitmap(result.get(0));
+                        }
+                    }).execute(agent.getImageUrl());
+                }
+            });
+        }
+        catch(Exception e){
+
+        }
     }
 
 

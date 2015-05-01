@@ -6,12 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.TimerTask;
 
 /**
@@ -29,9 +24,9 @@ public class RetslyTask extends TimerTask{
     @Override
     public void run(){
 
-        List<NameValuePair> q = new ArrayList<NameValuePair>();
+        /*List<NameValuePair> q = new ArrayList<NameValuePair>();
         q.add(new BasicNameValuePair("listDate[gt]", lastTime.toString()));
-        new Retsly().setQuery(q).queryListings(new RetslyListCallback<Listing>() {
+        new RetslyAndroidClient().setQuery(q).queryListings(new RetslyListCallback<Listing>() {
             @Override
             public void getDataList(List<Listing> data) {
                 if(data.size() > 0) {
@@ -39,7 +34,7 @@ public class RetslyTask extends TimerTask{
                     lastTime = new Date();
                 }
             }
-        });
+        });*/
 
 
     }

@@ -14,16 +14,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import io.rets.androidApp.sdk.RetslyAndroidClient;
+import io.rets.sdk.async.RetslyListCallback;
+import io.rets.sdk.resources.Listing;
+
 
 public class ListingsActivity extends ActionBarActivity {
 
-    Retsly retsly;
+    RetslyAndroidClient retsly;
     Date lastTime;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listings);
-        retsly = new Retsly();
+        retsly = new RetslyAndroidClient();
         //lastTime = new Date();
     }
 
@@ -47,13 +51,19 @@ public class ListingsActivity extends ActionBarActivity {
         }
         q.add(new BasicNameValuePair("sortBy", "lastModified"));
         q.add(new BasicNameValuePair("limit", "20"));
+        try{
+            retsly.listings().findAllAysnc(new RetslyListCallback<Listing>() {
+                @Override
+                public void getDataList(List<Listing> data) {
+                    addListings(data);
+                }
+            });
+        }
+        catch (Exception e){
 
-        retsly.setQuery(q).queryListings(new RetslyListCallback<Listing>() {
-            @Override
-            public void getDataList(List<Listing> data) {
-                addListings(data);
-            }
-        });
+        }
+
+
 
     }
 
