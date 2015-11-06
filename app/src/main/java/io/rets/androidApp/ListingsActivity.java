@@ -7,15 +7,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import io.rets.androidApp.sdk.RetslyAndroidClient;
 import io.rets.sdk.async.RetslyListCallback;
+import io.rets.sdk.query.ListingsQuery;
+import io.rets.sdk.query.Query;
 import io.rets.sdk.resources.Listing;
 
 
@@ -44,18 +42,17 @@ public class ListingsActivity extends ActionBarActivity {
     }
 
     public void loadListings(){
-        List<NameValuePair> q = new ArrayList<NameValuePair>();
+        ListingsQuery query = retsly.listings();
         if(lastTime != null) {
-            q.add(new BasicNameValuePair("listDate[gt]", lastTime.toString()));
+            query.where(Listing.ListingProperty.listDate, Query.Operators.gt, lastTime.toString());
             lastTime = new Date();
         }
-        q.add(new BasicNameValuePair("sortBy", "lastModified"));
-        q.add(new BasicNameValuePair("limit", "20"));
         try{
-            retsly.listings().findAllAysnc(new RetslyListCallback<Listing>() {
+            query.sort("lastModified").limit(8).findAllAysnc(new RetslyListCallback<Listing>() {
                 @Override
                 public void getDataList(List<Listing> data) {
-                    addListings(data);
+                    Log.v("List data", data.toString());
+                    if (data != null && data.size() > 0) addListings(data);
                 }
             });
         }
@@ -92,7 +89,7 @@ public class ListingsActivity extends ActionBarActivity {
     }
 
     public void addListings(List<Listing> listings){
-        Log.v("listings",listings.toString());
+        //Log.v("listings",listings.toString());
         LinearLayout ll = (LinearLayout)findViewById(R.id.Linear_Layout);
         for(Listing l : listings){
             ll.addView(new ListingView(l,this));

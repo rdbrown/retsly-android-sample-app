@@ -60,7 +60,7 @@ public class AgentActivity extends ActionBarActivity {
                         public void onBitmapLoad(List<Bitmap> result) {
                             if (result.size() > 0) agentPhoto.setImageBitmap(result.get(0));
                         }
-                    }).execute(agent.getImageUrl());
+                    }).execute(agent.getMediaUrl(0));
                 }
             });
         }
@@ -75,7 +75,7 @@ public class AgentActivity extends ActionBarActivity {
         Log.i("Make call", "");
 
         Intent phoneIntent = new Intent(Intent.ACTION_CALL);
-        phoneIntent.setData(Uri.parse("tel:" + agent.getPhone()));
+        phoneIntent.setData(Uri.parse("tel:" + agent.getCellPhone()));
 
         try {
             startActivity(phoneIntent);

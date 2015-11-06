@@ -21,7 +21,8 @@ public class RetslyAndroidClient extends RetslyClient
 
     public RetslyAndroidClient(){
         super(OauthLoginActivity.OAUTH_TOKEN);
-        RetslyClient.RESTLY_URL = "https://10.0.2.2/api/v1/";
+        RetslyClient.RESTLY_URL = "https://rets.io/api/v1/";
+        this.setVendor("test_sf");
         this.setAsync(new Async() {
             @Override
             public void excute(final AsyncInvoke asyncInvoke, final RetslyCallback cb) {

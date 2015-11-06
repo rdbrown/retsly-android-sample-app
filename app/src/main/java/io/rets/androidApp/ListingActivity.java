@@ -24,7 +24,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import io.rets.sdk.resources.Listing;
 
@@ -55,7 +58,7 @@ public class ListingActivity extends ActionBarActivity {
         ((TextView)findViewById(R.id.list_price)).setText(this.listing.getFormatedPrice());
         ((TextView)findViewById(R.id.year_built)).setText(Integer.toString(this.listing.getYearBuilt()));
 
-        ((TextView)findViewById(R.id.beds)).setText(Integer.toString(this.listing.getBeds()));
+        ((TextView)findViewById(R.id.beds)).setText(Integer.toString(this.listing.getBedrooms()));
         ((TextView)findViewById(R.id.baths)).setText(Integer.toString(this.listing.getBaths()));
 
 
@@ -83,22 +86,13 @@ public class ListingActivity extends ActionBarActivity {
         map.setMyLocationEnabled(true);
 
         // Needs to call MapsInitializer before doing any CameraUpdateFactory calls
-        MapsInitializer.initialize(this);
+        //MapsInitializer.initialize(this);
 
         listView = (LinearLayout)findViewById(R.id.photo_list);
-        String[] urls = this.listing.getImageUrlsArray();
-        new ImageLoadAsyncTask(new BitmapLoaded(){
-            @Override
-            public void onBitmapLoad(List<Bitmap> result){
+        String[] urls = this.listing.getMediaUrlsArray();
+        Queue<String> mediaArray = new LinkedBlockingQueue<>(Arrays.asList(this.listing.getMediaUrlsArray()));
 
-                for (Bitmap b : result) {
-                    ImageView imageView = new ImageView(listView.getContext());
-                    imageView.setImageBitmap(b);
-                    listView.addView(imageView);
-                }
-            }
-
-        }).execute(this.listing.getImageUrlsArray());
+        loadImages(mediaArray);
 
         Button agentButton = (Button) findViewById(R.id.agent_button);
         agentButton.setOnTouchListener(new View.OnTouchListener() {
@@ -114,6 +108,21 @@ public class ListingActivity extends ActionBarActivity {
         });
     }
 
+    public void loadImages(Queue<String> mediaArray){
+        new ImageLoadAsyncTask(new BitmapLoaded(){
+            @Override
+            public void onBitmapLoad(List<Bitmap> result){
+
+                for (Bitmap b : result) {
+                    ImageView imageView = new ImageView(listView.getContext());
+                    imageView.setImageBitmap(b);
+                    listView.addView(imageView);
+                }
+            }
+
+        }).execute(mediaArray.remove());
+        //if(mediaArray.size() > 0) this.loadImages(mediaArray);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

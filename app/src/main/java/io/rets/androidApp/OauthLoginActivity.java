@@ -19,6 +19,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -33,12 +34,12 @@ public class OauthLoginActivity extends Activity {
 /*CONSTANT FOR THE AUTHORIZATION PROCESS*/
 
     /****FILL THIS WITH YOUR INFORMATION*********/
-    private static final String API_KEY = "rhUL0Ou5VPPwDUvf9z0n"; //clientID
-    private static final String REDIRECT_URI = "http://testapproval.com";
+    private static final String API_KEY = "CLIENT_ID"; //clientID
+    private static final String REDIRECT_URI = "http://localhost:3003/redirect";
     /*********************************************/
 
 //These are constants used for build the urls
-    private static final String AUTHORIZATION_URL = "https://10.0.2.2/oauth/authorize";
+    private static final String AUTHORIZATION_URL = "https://rets.io/oauth/authorize";
     private static final String RESPONSE_TYPE_PARAM = "response_type";
     private static final String RESPONSE_TYPE_VALUE ="code";
     private static final String CLIENT_ID_PARAM = "client_id";
@@ -122,12 +123,12 @@ public class OauthLoginActivity extends Activity {
         protected String doInBackground(String... urls) {
 
 
-            HttpClient httpClient = HackHttpClient.getNewHttpClient();
-            HttpPost httppost = new HttpPost("https://10.0.2.2/oauth/token");
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost httppost = new HttpPost("https://rets.io/oauth/token");
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
             nameValuePairs.add(new BasicNameValuePair("code", OauthLoginActivity.OAUTH_CODE));
             nameValuePairs.add(new BasicNameValuePair("client_id", API_KEY));
-            nameValuePairs.add(new BasicNameValuePair("client_secret", "jL9AVhfqDQc7alDTOOPacbXokZDjTeLzzKJuxGM7"));
+            nameValuePairs.add(new BasicNameValuePair("client_secret", "CLIENT_SECRET"));
             nameValuePairs.add(new BasicNameValuePair("grant_type", "authorization_code"));
             nameValuePairs.add(new BasicNameValuePair("redirect_uri", REDIRECT_URI));
 
@@ -136,7 +137,8 @@ public class OauthLoginActivity extends Activity {
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
                 HttpResponse response = httpClient.execute(httppost);
-                Log.v("response ?","res");
+                //Log.v("response status code",response.getStatusLine().getStatusCode() + " code");
+                //Log.v("response output",EntityUtils.toString(response.getEntity()));
 
                 if(response!=null){
                     //If status is OK 200
@@ -145,8 +147,9 @@ public class OauthLoginActivity extends Activity {
                         //Convert the string result to a JSON Object
                         resultJson = new JSONObject(result);
                         //Extract data from JSON Response
-
+                        //System.out.println(resultJson.toString());
                         OauthLoginActivity.OAUTH_TOKEN = resultJson.has("access_token") ? resultJson.getString("access_token") : null;
+                        Log.v("response oauth",OauthLoginActivity.OAUTH_TOKEN );
                         this.thisAct.finish();
 
                         Intent intent = new Intent(this.thisAct, StartActivity.class);
@@ -160,7 +163,7 @@ public class OauthLoginActivity extends Activity {
             catch (JSONException e) {
                 Log.e("Authorize","Error Parsing Http response "+e.getLocalizedMessage());
             }
-            return resultJson.toString();
+            return resultJson!=null ? resultJson.toString() : "";
 
         }
         // onPostExecute displays the results of the AsyncTask.

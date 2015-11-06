@@ -5,7 +5,6 @@ package io.rets.androidApp;
  */
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.Log;
@@ -34,12 +33,12 @@ public class ListingView extends RelativeLayout {
             inflate(getContext(), R.layout.listing_view, this);
             this.description = (TextView)findViewById(R.id.description);
             this.header = (TextView)findViewById(R.id.title);
-            this.thumbnail = (ImageView)findViewById(R.id.imageView);
+            //this.thumbnail = (ImageView)findViewById(R.id.imageView);
             this.header.setText(Double.toString(l.getPrice()));
 
             this.description.setText(l.getAddress());
 
-            new HttpAsyncTask(this).execute(l.getImageUrl());
+            new HttpAsyncTask(this).execute(l.getMediaUrl(0));
             this.setOnTouchListener(new OnTouchListener() {
                 private float lastDownX;
 
@@ -87,7 +86,9 @@ public class ListingView extends RelativeLayout {
                     URL imgUrl = new URL(urls[0]);
 
                     if(imgUrl!=null){
-                        l.thumbnail.setImageBitmap(BitmapFactory.decodeStream(imgUrl.openConnection().getInputStream()));
+                        //l.thumbnail.setImageBitmap(
+                        //        BitmapFactory.decodeStream(imgUrl.openConnection().getInputStream())
+                        //);
                     }
                 }
                 catch (Exception e){
@@ -97,4 +98,5 @@ public class ListingView extends RelativeLayout {
                 return "yay";
             }
         }
+
     }
